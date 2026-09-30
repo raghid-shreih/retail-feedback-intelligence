@@ -1,9 +1,13 @@
 import json
+import sys
 import tempfile
 import unittest
 from pathlib import Path
+from types import ModuleType, SimpleNamespace
+from unittest.mock import patch
 
 from retail_feedback.cli import main
+from retail_feedback.client import ModelAPIError, OpenAIClient
 from retail_feedback.data import load_reviews, sample_reviews
 from retail_feedback.evaluation import compare, evaluate_recommendations, parse_recommendation
 
@@ -49,6 +53,28 @@ class WorkflowTests(unittest.TestCase):
 
     def test_offline_cli(self):
         self.assertEqual(main(["summary", str(FIXTURE)]), 0)
+
+    def test_credit_exhaustion_stops_instead_of_counting_invalid_prediction(self):
+        class FakeStatusError(Exception):
+            status_code = 429
+            code = "credit_balance_exhausted"
+
+        class FakeConnectionError(Exception):
+            pass
+
+        fake_openai = ModuleType("openai")
+        fake_openai.APIStatusError = FakeStatusError
+        fake_openai.APIConnectionError = FakeConnectionError
+        client = OpenAIClient.__new__(OpenAIClient)
+        client.model = "test-model"
+
+        def fail(**kwargs):
+            raise FakeStatusError("no credits")
+
+        client.client = SimpleNamespace(chat=SimpleNamespace(completions=SimpleNamespace(create=fail)))
+        with patch.dict(sys.modules, {"openai": fake_openai}):
+            with self.assertRaisesRegex(ModelAPIError, "credits are exhausted"):
+                evaluate_recommendations(load_reviews(FIXTURE).head(1), client.complete)
 
 
 if __name__ == "__main__":
