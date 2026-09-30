@@ -34,7 +34,7 @@ If the API returns `credit_balance_exhausted`, the account or organization behin
 
 ## Results and limits
 
-The [results note](docs/results.md) separates historical notebook observations from a reproducible rerun. The original notebook's 92% recommendation accuracy was measured on 50 sampled reviews, using an LLM to classify them. It is an exploratory result, not an out-of-sample validation or a claim about production accuracy. No paid API evaluation was run to prepare this repository.
+The [results note](docs/results.md) separates the historical notebook observations from a new 50-review run supplied by the project owner. Both report 92% recommendation accuracy on the seeded sample. This is an exploratory result, not an out-of-sample validation or a claim about production accuracy. The six analysis prompt variants have not been rerun with this package.
 
 The six prompts are adapted from the original notebook. They contain the fictional retail brand names and wording used in that experiment; minor inconsistencies in the original prompts are preserved so the variants remain recognizable. The new code uses the official OpenAI SDK endpoint by default and does not depend on a course-specific proxy or Google Drive mount.
 
