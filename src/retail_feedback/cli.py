@@ -4,6 +4,7 @@ import argparse
 import json
 from pathlib import Path
 
+from .client import ModelAPIError, OpenAIClient
 from .data import load_reviews, sample_reviews
 from .evaluation import compare, evaluate_recommendations
 from .prompts import ANALYSIS_PROMPTS
@@ -36,8 +37,6 @@ def main(argv: list[str] | None = None) -> int:
                       "recommendation_labels": frame["recommended_ind"].value_counts(dropna=False).to_dict()
                       if "recommended_ind" in frame else None}
         else:
-            from .client import OpenAIClient
-
             sampled = sample_reviews(frame, args.limit, args.seed)
             client = OpenAIClient(args.model)
             report = compare(sampled, client.complete, args.variants) if args.command == "compare" else \
@@ -51,5 +50,5 @@ def main(argv: list[str] | None = None) -> int:
         else:
             print(rendered)
         return 0
-    except (FileNotFoundError, ValueError, KeyError) as exc:
+    except (FileNotFoundError, ValueError, KeyError, ModelAPIError) as exc:
         build_parser().exit(2, f"error: {exc}\n")

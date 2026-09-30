@@ -30,6 +30,8 @@ retail-feedback compare data/Womens\ Clothing\ E-Commerce\ Reviews.csv --model Y
 
 The source file may have a different downloaded name; pass its actual path. Sampling uses pandas with seed 42 by default (`--seed` changes it). `data/`, `results/`, `.env`, and notebook outputs are excluded from version control.
 
+If the API returns `credit_balance_exhausted`, the account or organization behind your key has no API credits. Check [API billing](https://platform.openai.com/settings/organization/billing/) and add credits before retrying. A ChatGPT subscription does not include API usage. This is a billing failure, not an invalid prediction; the evaluator stops without saving a report.
+
 ## Results and limits
 
 The [results note](docs/results.md) separates historical notebook observations from a reproducible rerun. The original notebook's 92% recommendation accuracy was measured on 50 sampled reviews, using an LLM to classify them. It is an exploratory result, not an out-of-sample validation or a claim about production accuracy. No paid API evaluation was run to prepare this repository.
