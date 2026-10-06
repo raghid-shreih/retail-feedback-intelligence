@@ -10,6 +10,7 @@ from retail_feedback.cli import main
 from retail_feedback.client import ModelAPIError, OpenAIClient
 from retail_feedback.data import load_reviews, sample_reviews
 from retail_feedback.evaluation import compare, evaluate_recommendations, parse_recommendation
+from scripts.build_gallery import save_gallery, summarize_report
 
 FIXTURE = Path(__file__).parent / "fixtures" / "reviews.csv"
 
@@ -75,6 +76,29 @@ class WorkflowTests(unittest.TestCase):
         with patch.dict(sys.modules, {"openai": fake_openai}):
             with self.assertRaisesRegex(ModelAPIError, "credits are exhausted"):
                 evaluate_recommendations(load_reviews(FIXTURE).head(1), client.complete)
+
+    def test_gallery_checks_report_and_renders_aggregate_figures(self):
+        responses = iter([
+            '{"Recommended_IND":1,"Reason":"Great fit"}',
+            '{"Recommended_IND":"0","Reason":"Invalid"}',
+            '{"Recommended_IND":1,"Reason":"Comfortable"}',
+            '{"Recommended_IND":0,"Reason":"Returned"}',
+        ])
+        report = evaluate_recommendations(load_reviews(FIXTURE), lambda _: next(responses))
+        summary = summarize_report(report)
+        self.assertEqual(summary["valid"], 3)
+        self.assertEqual(summary["correct"], 3)
+        with tempfile.TemporaryDirectory() as directory:
+            paths = save_gallery(report, directory)
+            self.assertEqual({path.name for path in paths}, {"sample-accuracy.svg", "confusion-matrix.svg"})
+            for path in paths:
+                svg = path.read_text()
+                self.assertIn("<svg", svg)
+                self.assertNotIn("Great fit", svg)
+                self.assertNotIn("source_row", svg)
+        report["confusion_matrix_valid_only"]["tp"] += 1
+        with self.assertRaisesRegex(ValueError, "do not match"):
+            summarize_report(report)
 
 
 if __name__ == "__main__":

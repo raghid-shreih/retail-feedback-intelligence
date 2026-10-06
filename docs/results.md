@@ -4,6 +4,18 @@
 
 The project owner supplied `smoke-test.json` and `recommendations.json` generated with the package CLI and `gpt-4o-mini`. We checked their row-level predictions against the supplied Women's E-Commerce Clothing Reviews CSV (SHA-256 `bd93cc515747ad1f87b8bc863c9e40da758509e6db6506a96d06976e61e36ee0`). The loader retained 22,641 reviews with text; the 50 source-row indices and labels match pandas sampling with seed 42. The five-review smoke test matches the first five rows of the 50-review run.
 
+### Evaluation gallery
+
+The figures below were regenerated from the supplied 50-review JSON report by [`scripts/build_gallery.py`](../scripts/build_gallery.py). They contain aggregate counts only; the source CSV and row-level report are excluded from the repository. The historical prompt scores below are a separate notebook observation and are not plotted as part of this rerun.
+
+![Horizontal bars comparing 46 correct predictions out of 50 for the recommendation prompt with 38 out of 50 for the sample's majority-class baseline](../assets/sample-accuracy.svg)
+
+The majority-class baseline always predicts the more common label in these same 50 reviews ("recommended"). Its 76% is a descriptive reference calculated on this sample, not a trained or independently evaluated baseline. The 16 percentage-point gap is specific to these 50 attempts.
+
+![Confusion matrix for 50 valid predictions: 12 true negatives, zero false positives, four false negatives, and 34 true positives](../assets/confusion-matrix.svg)
+
+Rows are dataset labels; columns are predictions. The four disagreements are reviews labeled “recommended” that the prompt classified “not recommended.” All 50 responses were valid in this run, so the displayed matrix covers every attempt.
+
 | Measure | Five-review smoke test | 50-review run |
 | --- | ---: | ---: |
 | Valid predictions / attempted | 5 / 5 | 50 / 50 |

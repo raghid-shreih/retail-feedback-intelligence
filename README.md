@@ -2,6 +2,12 @@
 
 A reproducible portfolio project for analyzing apparel reviews and testing whether a language model can predict the reviewer's product recommendation. It turns the original exploratory notebook into a small Python package with bounded command line experiments, schema validation, offline tests, and a clean walkthrough notebook.
 
+## Evaluation snapshot
+
+The verified 50-review run produced 46 correct predictions (92%). On that same sample, always predicting its majority class would give 38/50 (76%). This small comparison illustrates the run; it is **not** a generalization estimate or a claim that the model will retain this advantage on other reviews. See the [evaluation gallery](docs/results.md#evaluation-gallery) for the confusion matrix and limitations.
+
+![Horizontal bars showing 92% accuracy for the recommendation prompt and 76% for the majority-class baseline on one 50-review sample](assets/sample-accuracy.svg)
+
 ## What it does
 
 - Loads the [Women's E-Commerce Clothing Reviews dataset](https://www.kaggle.com/datasets/nicapotato/womens-ecommerce-clothing-reviews), including comma-separated source files and semicolon-separated notebook exports.
@@ -30,6 +36,15 @@ retail-feedback compare data/Womens\ Clothing\ E-Commerce\ Reviews.csv --model Y
 
 The source file may have a different downloaded name; pass its actual path. Sampling uses pandas with seed 42 by default (`--seed` changes it). `data/`, `results/`, `.env`, and notebook outputs are excluded from version control.
 
+To rebuild the two aggregate SVG figures from a locally generated recommendation report, install the optional plotting dependency and run:
+
+```bash
+python -m pip install -e '.[plots]'
+python scripts/build_gallery.py results/recommendations.json
+```
+
+The script checks the summary against the report's row-level predictions. It writes only aggregate figures to `assets/`; review them before committing. The local JSON report and source reviews remain ignored.
+
 If the API returns `credit_balance_exhausted`, the account or organization behind your key has no API credits. Check [API billing](https://platform.openai.com/settings/organization/billing/) and add credits before retrying. A ChatGPT subscription does not include API usage. This is a billing failure, not an invalid prediction; the evaluator stops without saving a report.
 
 ## Results and limits
@@ -46,6 +61,8 @@ The six prompts are adapted from the original notebook. They contain the fiction
 | `notebooks/walkthrough.ipynb` | Clean offline walkthrough with a guarded optional API example |
 | `tests/` | Synthetic fixture and offline workflow tests |
 | `docs/results.md` | Historical findings, limitations, and reproducibility notes |
+| `scripts/build_gallery.py` | Rebuild the two evaluation figures from a local JSON report |
+| `assets/*.svg` | Aggregate figures shown in the README and results page |
 
 ## Responsible use
 
